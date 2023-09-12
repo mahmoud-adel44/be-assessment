@@ -33,23 +33,23 @@ class CreateUsersTable extends DB {
           allowNull: true,
         },
         email_verified_at: {
-            type: DataTypes.DATE,
-            allowNull: true,
-        }
+          type: DataTypes.DATE,
+          allowNull: true,
+        },
       },
       { sequelize }
     )
       .sync({ force: true })
       .then(() => {
         console.log('users table Created Successfully'.toUpperCase())
+        // Register User hooks...
+        UserHooks.register()
+        console.log('User Hooks Registered')
       })
       .catch((err: Error) => {
         console.log(err.message, 'users table')
       })
-
-    // Register User hooks...
-      UserHooks.register()
   }
 }
 
-export default (new CreateUsersTable())
+export default new CreateUsersTable()

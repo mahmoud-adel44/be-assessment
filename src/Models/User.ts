@@ -34,4 +34,10 @@ export default class User extends Model implements IUser {
   public isVerified() {
     return !! this.email_verified_at
   }
+
+  public markAsVerified() {
+    return this.update({
+      email_verified_at: Date.now()
+    })
+  }
 }

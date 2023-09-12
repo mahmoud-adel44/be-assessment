@@ -15,17 +15,12 @@ export default class UserController {
         attributes: ['id', 'name', 'email', 'address'],
       })
 
-      return response.status(StatusCodes.OK).json({
-        success: true,
-        data: users,
-        message: 'This Action has been successfully',
-      })
+      return ApiResponse.new(response).setData(users).toJson()
     } catch (error: any) {
-      response.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
-        success: false,
-        message: error.message,
-        data: error.data,
-      })
+      return ApiResponse.new(response)
+        .setStatus(StatusCodes.UNPROCESSABLE_ENTITY)
+        .setErrors(error.message)
+        .toJson()
     }
   }
 
@@ -74,25 +69,25 @@ export default class UserController {
   }
 
   public static async verify(
-      request: Request,
-      response: Response,
-      next: NextFunction
+    request: Request,
+    response: Response,
+    next: NextFunction
   ): Promise<Response | void> {
     try {
       const user = await User.findOne({ where: { email: request.body.email } })
-      if (user && (await bcrypt.compare(request.body.email, user.password))) {
-        const token = user.createToken()
+      if (user) {
+        const token = await user.markAsVerified()
 
         return ApiResponse.new(response)
-            .setStatus(StatusCodes.OK)
-            .setData({ user, token })
-            .toJson()
+          .setStatus(StatusCodes.OK)
+          .setData({ user, token })
+          .toJson()
       }
     } catch (error: any) {
       return ApiResponse.new(response)
-          .setStatus(StatusCodes.UNPROCESSABLE_ENTITY)
-          .setErrors(error.data)
-          .toJson()
+        .setStatus(StatusCodes.UNPROCESSABLE_ENTITY)
+        .setErrors(error.data)
+        .toJson()
     }
   }
 }
